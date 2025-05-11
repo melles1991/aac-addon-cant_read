@@ -58,22 +58,23 @@ local function writeChatToTranslatingFile(channel, unit, isHostile, name, messag
         -- Заміняємо частини в квадратних дужках на тимчасові токени
         local cleanedMessage, protectedParts = extractProtected(message)
 
-        -- Replace item link text with the item's name
-        local count = 0
-        while string.find(cleanedMessage, "|i") and count > 5 do 
-            local beginIndex, _ = string.find(cleanedMessage, "|i")
-            local _, endIndex = string.find(cleanedMessage, '0;')
-            if beginIndex ~= nil and endIndex ~= nil then 
-                local itemLinkText = string.sub(cleanedMessage, beginIndex, endIndex)
-                local itemId = itemIdFromItemLinkText(itemLinkText)
-                local itemInfo = api.Item:GetItemInfoByType(tonumber(itemId))
-                
-                local beforeLink = string.sub(cleanedMessage, 0, beginIndex)
-                local afterLink = string.sub(cleanedMessage, endIndex + 1, #cleanedMessage)
-                cleanedMessage = beforeLink .. "" .. itemInfo.name .. " " .. afterLink 
-            end 
-            count = count + 1
-        end 
+-- Replace item link text with the item's name
+local count = 0
+while string.find(cleanedMessage, "|i") and count < 5 do -- fix this condition
+    local beginIndex, _ = string.find(cleanedMessage, "|i")
+    local _, endIndex = string.find(cleanedMessage, '0;')
+    if beginIndex ~= nil and endIndex ~= nil then 
+        local itemLinkText = string.sub(cleanedMessage, beginIndex, endIndex)
+        local itemId = itemIdFromItemLinkText(itemLinkText)
+        local itemInfo = api.Item:GetItemInfoByType(tonumber(itemId))
+        
+        local beforeLink = string.sub(cleanedMessage, 0, beginIndex)
+        local afterLink = string.sub(cleanedMessage, endIndex + 1, #cleanedMessage)
+        cleanedMessage = beforeLink .. "" .. itemInfo.name .. " " .. afterLink 
+    end 
+    count = count + 1
+end 
+
         cleanedMessage = string.gsub(cleanedMessage, "%|", "")
 
         -- Тепер відновлюємо частини в квадратних дужках після перекладу
@@ -220,4 +221,6 @@ cant_read_addon.OnLoad = OnLoad
 cant_read_addon.OnUnload = OnUnload
 
 return cant_read_addon
+
+
 
